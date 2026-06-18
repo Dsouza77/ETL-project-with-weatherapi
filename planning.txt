@@ -1,0 +1,39 @@
+resumo: extrair dados da weatherapi, transformar, e carregar esses dados num arquivo csv (apenas como backup) e
+usando o psycop2, carregar eles num banco de dados postgresql.
+
+extract:
+    extrair:    name = data["location"]["name"] #nome da cidade
+                state = data["location"]["region"] #estado
+                time_local = data["location"]["localtime"][11:16] #horário
+                date = data['current']["last_updated"][:10] #data último atualização
+                climate = data["current"]["condition"]["text"] #descrição do clima
+                temp = data["current"]["temp_c"] #temperatura em celsius
+                humidity = float(data["current"]["humidity"]) #humidade do ar (%)
+                pressure_mb = float(data["current"]["pressure_mb"]) #pressão atmosférica
+                cloud = float(data["current"]["cloud"]) #porcentagem cobertura nuvens (%)
+                wind_kph = data["current"]["wind_kph"] #velocidade vento km/h
+                precip_mm = float(data["current"]["precip_mm"]) #quantidade precipitação chuva em mm
+                chance_of_rain = data["current"]["chance_of_rain"] #chance de chuva (%)
+                dewpoint_c = float(data["current"]["dewpoint_c"]) #ponto de orvalho em celsius
+                uv = data["current"]["uv"] #índice UV
+                gust_kph = data["current"]["gust_kph"] #velocidade rajadas de vento km/h
+                condition = data["current"]["condition"]["code"] #codigo numerico condição climatica
+
+        da api da weatherapi;
+Transform:
+    criar o score, formatar tudo para porcentagem (se possível), formatar para apenas 2 casas decimais após a vírgula,
+    validação de nulos, conversão de tipos (str to int/float...), separação data/hora (já feito), status climático e
+    obter 2 tipos de fontes de horário (a primeira será o horário vindo diretamente da API "geralmente vem com erros,
+    a API tem esse "defeito", vindo correto apenas a data, o horário sai um pouco adiantado ou atrasado, talvez por
+    tempo de processamento ou mal formulação no código da API) usando a biblioteca nativa do python "datetime" conseguimos
+    obter o horario em tempo real de "America_Sao_Paulo" e agregar no sistema.
+
+    "Transformação não é mover dados. Transformação é agregar valor aos dados."
+
+Load:
+    Carregar os dados brutos em um arquivo csv pra servir apenas de backup;
+    Carregar o banco de dados principal usando Postgresql junto ao Psycopg2;
+    Criar um arquivo "config_load" pra subir os dados pro csv e pro postgre por ele,
+    é importante que primeiro execute a função de carregar pro csv, e se der erro, parar
+    a operação, pois o arquivo csv é prioridade.
+
